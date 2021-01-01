@@ -1,4 +1,9 @@
-﻿using Restaurant.Core.ViewModels.Food;
+﻿using System;
+using System.Reactive.Linq;
+using Autofac;
+using Restaurant.Core.ViewModels;
+using Restaurant.Core.ViewModels.Food;
+using Xamarin.Forms;
 using Xamarin.Forms.Xaml;
 
 namespace Restaurant.Mobile.UI.Pages
@@ -17,6 +22,7 @@ namespace Restaurant.Mobile.UI.Pages
         protected override async void OnLoaded()
         {
             base.OnLoaded();
+            BindingContext = ViewModel;
             await ViewModel.LoadFoods();
         }
     }
