@@ -17,10 +17,8 @@ use rocket::fs::{relative, FileServer};
 use rocket::Build;
 use rocket::Rocket;
 
-use rocket_okapi::okapi::schemars;
-use rocket_okapi::okapi::schemars::JsonSchema;
-use rocket_okapi::settings::UrlObject;
-use rocket_okapi::{openapi, openapi_get_routes, swagger_ui::*};
+use rocket_okapi::swagger_ui::{make_swagger_ui, SwaggerUIConfig};
+use rocket_okapi::{openapi, openapi_get_routes, JsonSchema};
 
 mod db;
 mod handlers;
@@ -28,7 +26,6 @@ mod models;
 mod paste_id;
 mod schema;
 mod seeder;
-
 
 pub const MIGRATIONS: EmbeddedMigrations = embed_migrations!("migrations");
 
@@ -47,6 +44,24 @@ fn run_migrations_pending_migrations(
     Ok(())
 }
 
+fn get_docs() -> SwaggerUIConfig {
+    use rocket_okapi::settings::UrlObject;
+
+    SwaggerUIConfig {
+        urls: vec![
+            UrlObject {
+                name: "catalog".to_string(),
+                url: "/catalog/openapi.json".to_string(),
+            },
+            UrlObject {
+                name: "categories".to_string(),
+                url: "/categories/openapi.json".to_string(),
+            },
+        ],
+        ..Default::default()
+    }
+}
+
 #[launch]
 async fn rocket() -> _ {
     println!("manifest dir: {}", env!("CARGO_MANIFEST_DIR"));
@@ -54,12 +69,18 @@ async fn rocket() -> _ {
     rocket::build()
         .attach(AdHoc::on_ignite("Diesel Migrations", run_migrations))
         .mount("/", routes![catalog::index])
-        .mount("/categories", routes![category::get_categories])
+        .mount("/swagger", make_swagger_ui(&get_docs()))
+        .mount("/categories", openapi_get_routes![category::get_categories])
         .mount(
             "/catalog",
-            routes![catalog::create, catalog::update, catalog::delete],
+            openapi_get_routes![
+                catalog::get_catalogs,
+                catalog::get_catalog,
+                catalog::create,
+                catalog::update,
+                catalog::delete
+            ],
         )
-        .mount("/catalogs", routes![catalog::get_catalogs])
         .mount("/file", routes![upload::upload, upload::retrieve])
         .mount("/pictures", FileServer::from(relative!("pictures")))
 }
