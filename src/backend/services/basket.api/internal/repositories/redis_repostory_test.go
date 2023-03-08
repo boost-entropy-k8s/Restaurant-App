@@ -9,8 +9,7 @@ import (
 )
 
 var items = []models.BasketItem{{
-	ID:           uuid.New(),
-	FoodID:       uuid.New(),
+	FoodID:       1,
 	UnitPrice:    20,
 	OldUnitPrice: 10,
 	Quantity:     1,
