@@ -22,14 +22,6 @@ env:
   IMAGE_NAME: basket-api
 
 jobs:
-  lint:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout Code
-        uses: actions/checkout@v3
-        with:
-          fetch-depth: 0                # fetch the whole repo history
-
   build:
     outputs:
       new-version: ${{ steps.version.outputs.new-version }}
@@ -91,11 +83,11 @@ jobs:
         directory: ./src/backend/services/${{ env.SERVICE_NAME }}
         origin-branch: ${{ github.ref }}
         
-    - name: "Push changes into master"
+    - name: "Push changes"
       if: github.ref == 'refs/heads/develop'
-      uses: ./.github/actions/git-push
+      uses: ad-m/github-push-action@master
       with:
-        origin-branch: ${{ github.ref }}
+        branch: ${{ github.head_ref }}
 
   analyze:
     name: analyze
@@ -142,8 +134,8 @@ jobs:
   update-manifests:
     if: github.ref == 'refs/heads/develop'
     needs:
-      - release
       - build
+      - release
     uses: ./.github/workflows/deploy.yml
     with:
       service-name: basket-api
