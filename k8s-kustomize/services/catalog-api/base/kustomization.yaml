@@ -12,17 +12,17 @@ resources:
 configMapGenerator:
 - envs:
   - config.env
-  name: menu-api
+  name: catalog-api
 
 secretGenerator:
 - envs:
   - .env.secret
-  name: menu-api
+  name: catalog-api
 
 images:
 - name: catalog-api
   newName: ghcr.io/chayxana/catalog-api
-  newTag: 0.0.4
+  newTag: 0.0.5
 - name: menu-api
   newName: ghcr.io/chayxana/menu
   newTag: 1.0.1
